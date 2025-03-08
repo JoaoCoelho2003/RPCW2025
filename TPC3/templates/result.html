@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Resultado</h1>
+        {% if correct %}
+            <p><strong>Resposta Correta!</strong></p>
+        {% else %}
+            <p><strong>Resposta Errada!</strong></p>
+            <p><strong>Resposta Correta: </strong>{{ correct_answer }}</p>
+        {% endif %}
+
+        <p>Score Atual: {{ score }}</p>
+        <a href="{{ url_for('quiz') }}">Próxima Pergunta</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - História de Portugal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz - História de Portugal</h1>
+        <form method="POST">
+            <h2>{{ question['question'] }}</h2>
+
+            {% if question['type'] == 'multiple_choice' %}
+                {% for option in question['options'] %}
+                    <label>
+                        <input type="radio" name="answer" value="{{ option }}" required>
+                        {{ option }}
+                    </label>
+                {% endfor %}
+            {% elif question['type'] == 'true_false' %}
+                <label>
+                    <input type="radio" name="answer" value="Verdadeiro" required>
+                    Verdadeiro
+                </label>
+                <label>
+                    <input type="radio" name="answer" value="Falso" required>
+                    Falso
+                </label>
+            {% elif question['type'] == 'correspondence' %}
+                <div class="correspondence-container">
+                    <div class="correspondence-lists">
+                        <div class="list-column">
+                            <h3>Itens</h3>
+                            <ul class="items-list">
+                                {% for item, _ in question['options'] %}
+                                    <li class="item">{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="list-column">
+                            <h3>Correspondências</h3>
+                            <ul class="matches-list">
+                                {% for _, match in question['options'] %}
+                                    <li class="match-item">
+                                        <select name="correspondence[]" required>
+                                            <option value="" disabled selected>Selecione...</option>
+                                            {% for item, _ in question['options'] %}
+                                                <option value="{{ item }}">{{ item }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span class="match-text">{{ match }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <input type="hidden" name="question" value="{{ question['question'] }}">
+            <button type="submit">Responder</button>
+        </form>
+    </div>
+</body>
+</html>
