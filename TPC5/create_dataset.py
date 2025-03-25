@@ -131,7 +131,7 @@ def combine_data():
         "allPeople": all_people,
     }
 
-    with open("imdb_movies.json", "w", encoding="utf-8") as f:
+    with open("moviesFinal.json", "w", encoding="utf-8") as f:
         json.dump(data_output, f, indent=4, ensure_ascii=False)
 
     print("Final JSON dataset created: imdb_movies.json")
