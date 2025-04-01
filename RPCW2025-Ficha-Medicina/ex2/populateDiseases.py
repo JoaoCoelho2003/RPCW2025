@@ -1,47 +1,66 @@
+from rdflib import Graph, Namespace, RDF, RDFS, OWL, Literal
 import csv
 
-with open('diseases.ttl', 'w') as ttl_file:
-	ttl_file.write('@prefix : <http://www.example.org/disease-ontology#> .\n')
-	ttl_file.write('@prefix owl: <http://www.w3.org/2002/07/owl#> .\n')
-	ttl_file.write('@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n')
-	ttl_file.write('@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n')
-	ttl_file.write('@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\n')
+EX = Namespace("http://www.example.org/disease-ontology#")
 
-	with open('../datasets/Disease_Syntoms.csv', 'r') as csv_file:
-		reader = csv.DictReader(csv_file)
-		disease_symptoms = {}
-		disease_treatments = {}
-		symptoms_set = set()
-		treatments_set = set()
+existing_graph = Graph()
+existing_graph.parse("medical.ttl", format="turtle")
 
-		for row in reader:
-			disease = row['Disease'].strip().replace(' ', '_')
-			symptoms = [row[f'Symptom_{i}'].strip().replace(' ', '_') for i in range(1, 18) if row[f'Symptom_{i}']]
-			treatments = [row[f'Treatment_{i}'].strip().replace(' ', '_') for i in range(1, 6) if row.get(f'Treatment_{i}')]
+new_graph = Graph()
 
-			if disease not in disease_symptoms:
-				disease_symptoms[disease] = set()
-			disease_symptoms[disease].update(symptoms)
+new_graph.bind("", EX)
+new_graph.bind("owl", OWL)
+new_graph.bind("rdf", RDF)
+new_graph.bind("rdfs", RDFS)
 
-			if disease not in disease_treatments:
-				disease_treatments[disease] = set()
-			disease_treatments[disease].update(treatments)
+new_graph.add((EX.Ontology, RDF.type, OWL.Ontology))
 
-			symptoms_set.update(symptoms)
-			treatments_set.update(treatments)
+new_graph.add((EX.Disease, RDF.type, OWL.Class))
+new_graph.add((EX.Symptom, RDF.type, OWL.Class))
+new_graph.add((EX.Treatment, RDF.type, OWL.Class))
+new_graph.add((EX.Patient, RDF.type, OWL.Class))
 
-		for disease, symptoms in disease_symptoms.items():
-			ttl_file.write(f':{disease} a :Disease ;\n')
-			ttl_file.write(f'\t:hasSymptom {", ".join(f":{symptom}" for symptom in symptoms)} ;\n')
-			if disease in disease_treatments:
-				ttl_file.write(f'\t:hasTreatment {", ".join(f":{treatment}" for treatment in disease_treatments[disease])} .\n\n')
-			else:
-				ttl_file.write('.\n\n')
+new_graph.add((EX.hasSymptom, RDF.type, OWL.ObjectProperty))
+new_graph.add((EX.hasSymptom, RDFS.domain, EX.Disease))
+new_graph.add((EX.hasSymptom, RDFS.range, EX.Symptom))
 
-		for symptom in symptoms_set:
-			ttl_file.write(f':{symptom} a :Symptom .\n')
+new_graph.add((EX.hasTreatment, RDF.type, OWL.ObjectProperty))
+new_graph.add((EX.hasTreatment, RDFS.domain, EX.Disease))
+new_graph.add((EX.hasTreatment, RDFS.range, EX.Treatment))
 
-		ttl_file.write('\n')
+with open("../datasets/Disease_Syntoms.csv", "r") as csv_file:
+    reader = csv.DictReader(csv_file)
+    symptoms_set = set()
+    treatments_set = set()
 
-		for treatment in treatments_set:
-			ttl_file.write(f':{treatment} a :Treatment .\n')
+    for row in reader:
+        disease = row["Disease"].strip().replace(" ", "_")
+        disease_uri = EX[disease]
+        new_graph.add((disease_uri, RDF.type, EX.Disease))
+
+        symptoms = [
+            row[f"Symptom_{i}"].strip().replace(" ", "_")
+            for i in range(1, 18)
+            if row[f"Symptom_{i}"]
+        ]
+        treatments = [
+            row[f"Treatment_{i}"].strip().replace(" ", "_")
+            for i in range(1, 6)
+            if row.get(f"Treatment_{i}")
+        ]
+
+        for symptom in symptoms:
+            symptom_uri = EX[symptom]
+            new_graph.add((symptom_uri, RDF.type, EX.Symptom))
+            new_graph.add((disease_uri, EX.hasSymptom, symptom_uri))
+            symptoms_set.add(symptom)
+
+        for treatment in treatments:
+            treatment_uri = EX[treatment]
+            new_graph.add((treatment_uri, RDF.type, EX.Treatment))
+            new_graph.add((disease_uri, EX.hasTreatment, treatment_uri))
+            treatments_set.add(treatment)
+
+existing_graph += new_graph
+
+existing_graph.serialize(destination="final.ttl", format="turtle")
