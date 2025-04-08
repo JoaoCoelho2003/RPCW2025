@@ -22,9 +22,9 @@ new_graph.add((EX.Symptom, RDF.type, OWL.Class))
 new_graph.add((EX.Treatment, RDF.type, OWL.Class))
 new_graph.add((EX.Patient, RDF.type, OWL.Class))
 
-new_graph.add((EX.hasSymptom, RDF.type, OWL.ObjectProperty))
-new_graph.add((EX.hasSymptom, RDFS.domain, EX.Disease))
-new_graph.add((EX.hasSymptom, RDFS.range, EX.Symptom))
+new_graph.add((EX.hasSymptomD, RDF.type, OWL.ObjectProperty))
+new_graph.add((EX.hasSymptomD, RDFS.domain, EX.Disease))
+new_graph.add((EX.hasSymptomD, RDFS.range, EX.Symptom))
 
 new_graph.add((EX.hasTreatment, RDF.type, OWL.ObjectProperty))
 new_graph.add((EX.hasTreatment, RDFS.domain, EX.Disease))
@@ -34,9 +34,9 @@ new_graph.add((EX.hasDescription, RDF.type, OWL.DatatypeProperty))
 new_graph.add((EX.hasDescription, RDFS.domain, EX.Disease))
 new_graph.add((EX.hasDescription, RDFS.range, XSD.string))
 
-new_graph.add((EX.hasSympton, RDF.type, OWL.ObjectProperty))
-new_graph.add((EX.hasSympton, RDFS.domain, EX.Patient))
-new_graph.add((EX.hasSympton, RDFS.range, EX.Symptom))
+new_graph.add((EX.hasSymptomP, RDF.type, OWL.ObjectProperty))
+new_graph.add((EX.hasSymptomP, RDFS.domain, EX.Patient))
+new_graph.add((EX.hasSymptomP, RDFS.range, EX.Symptom))
 
 new_graph.add((EX.hasName, RDF.type, OWL.DatatypeProperty))
 new_graph.add((EX.hasName, RDFS.domain, EX.Patient))
@@ -64,7 +64,7 @@ with open("../datasets/Disease_Syntoms.csv", "r") as csv_file:
         for symptom in symptoms:
             symptom_uri = EX[symptom]
             new_graph.add((symptom_uri, RDF.type, EX.Symptom))
-            new_graph.add((disease_uri, EX.hasSymptom, symptom_uri))
+            new_graph.add((disease_uri, EX.hasSymptomD, symptom_uri))
             symptoms_set.add(symptom)
 
 with open("../datasets/Disease_Description.csv", "r") as csv_file:
@@ -116,7 +116,7 @@ with open("../datasets/doentes.json", "r") as json_file:
         i += 1
         for symptom in patient["sintomas"]:
             symptom_uri = EX[symptom.strip().replace(" ", "_")]
-            new_graph.add((name_uri, EX.hasSympton, symptom_uri))
+            new_graph.add((name_uri, EX.hasSymptomP, symptom_uri))
 
 existing_graph += new_graph
 existing_graph.serialize(destination="med_doentes.ttl", format="turtle")

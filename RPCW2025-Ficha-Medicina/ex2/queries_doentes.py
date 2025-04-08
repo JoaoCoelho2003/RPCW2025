@@ -22,7 +22,7 @@ print("\nQue doenças estão associadas ao sintoma yellowish_skin?")
 q = """
 SELECT ?d {
 	?d a :Disease .
-	?d :hasSymptom :yellowish_skin .
+	?d :hasSymptomD :yellowish_skin .
 }
 """
 
